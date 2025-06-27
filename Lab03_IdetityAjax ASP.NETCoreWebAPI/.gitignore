@@ -1,0 +1,72 @@
+# Ignore Visual Studio specific files
+.vscode/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore build and output folders
+bin/
+obj/
+out/
+Debug/
+Release/
+
+# Ignore NuGet packages
+packages/
+*.nupkg
+.nuget/
+
+# Ignore NuGet config cache
+project.assets.json
+project.nuget.cache
+nuget.config
+packages.lock.json
+
+# Ignore build artifacts
+*.cache
+assets.cache
+AssemblyReference.cache
+
+# Ignore temporary and log files
+*.log
+*.tlog
+*.pdb
+*.ilk
+*.obj
+*.scc
+*.lst
+*.wrn
+*.bak
+*.swp
+
+# Ignore Rider and JetBrains IDE files
+.idea/
+*.sln.iml
+
+# Ignore ReSharper files
+_ReSharper*/
+*.DotSettings.user
+
+# Ignore Rider workspace files
+workspace.xml
+.idea/
+
+# Ignore user-specific settings
+*.DS_Store
+Thumbs.db
+*.vsconfig
+
+/packages/
+/obj/
+/bin/
+*.user
+*.csproj.nuget.g.props
+*.csproj.nuget.g.targets
+*.csproj.user
+
+# Ignore auto-generated .NET files
+*.cache
+*.FileListAbsolute.txt
+apphost.exe
