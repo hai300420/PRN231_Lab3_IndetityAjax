@@ -31,7 +31,6 @@ public partial class MyStoreDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseSqlServer(GetConnectionString());
 
-
     private string GetConnectionString()
     {
         IConfiguration configuration = new ConfigurationBuilder()
@@ -44,7 +43,7 @@ public partial class MyStoreDbContext : DbContext
     {
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Account__349DA5A604AAB09E");
+            entity.HasKey(e => e.AccountId).HasName("PK__Account__349DA5A6B25BF1FC");
 
             entity.ToTable("Account");
 
@@ -60,7 +59,7 @@ public partial class MyStoreDbContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A0BBBE27746");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A0BEAC5BC2A");
 
             entity.ToTable("Category");
 
@@ -69,7 +68,7 @@ public partial class MyStoreDbContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__Order__C3905BCFCB985B4B");
+            entity.HasKey(e => e.OrderId).HasName("PK__Order__C3905BCF62237474");
 
             entity.ToTable("Order");
 
@@ -85,7 +84,7 @@ public partial class MyStoreDbContext : DbContext
 
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.HasKey(e => e.OrderDetailId).HasName("PK__Order_de__D3B9D36C327CF742");
+            entity.HasKey(e => e.OrderDetailId).HasName("PK__Order_de__D3B9D36C17056A0E");
 
             entity.ToTable("Order_detail");
 
@@ -103,10 +102,11 @@ public partial class MyStoreDbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__Product__B40CC6CDC64F711D");
+            entity.HasKey(e => e.ProductId).HasName("PK__Product__B40CC6CDC765AC0E");
 
             entity.ToTable("Product");
 
+            entity.Property(e => e.ProductDescription).HasMaxLength(500);
             entity.Property(e => e.ProductName).HasMaxLength(40);
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
@@ -118,7 +118,7 @@ public partial class MyStoreDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE1AABBB820C");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE1AD125E843");
 
             entity.ToTable("Role");
 

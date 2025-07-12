@@ -1,3 +1,6 @@
+using BusinessObjects;
+using Microsoft.EntityFrameworkCore;
+
 namespace IdentityAjaxClient
 {
     public class Program
@@ -7,14 +10,42 @@ namespace IdentityAjaxClient
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddRazorPages();
+
+            // Add HttpContext Accessor
+            builder.Services.AddHttpContextAccessor();
+
+            // Add Session support
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
+
+            // Get connection string from appsettings.json
+            var connectionString = builder.Configuration.GetConnectionString("MyStoreDB");
+
+            // Register DbContext with DI
+            builder.Services.AddDbContext<MyStoreDbContext>(options =>
+                options.UseSqlServer(connectionString));
+
+            // Register HttpClient for making API calls
+            builder.Services.AddTransient<JwtTokenHandler>();
+            builder.Services.AddHttpClient("API", client =>
+            {
+                var apiSettings = builder.Configuration.GetSection("ApiSettings:BaseUrl").Value;
+                client.BaseAddress = new Uri(apiSettings);
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            }).AddHttpMessageHandler<JwtTokenHandler>();
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -22,13 +53,38 @@ namespace IdentityAjaxClient
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseSession();
+
+            app.Use(async (context, next) =>
+            {
+                // Check if session is empty but cookies exist
+                if (context.Session.GetString("JWTToken") == null &&
+                    context.Request.Cookies.ContainsKey("JWTToken"))
+                {
+                    // Restore session from cookies
+                    context.Session.SetString("JWTToken", context.Request.Cookies["JWTToken"]);
+
+                    if (context.Request.Cookies.ContainsKey("UserId"))
+                        context.Session.SetString("UserId", context.Request.Cookies["UserId"]);
+
+                    if (context.Request.Cookies.ContainsKey("UserRole"))
+                        context.Session.SetString("UserRole", context.Request.Cookies["UserRole"]);
+
+                    if (context.Request.Cookies.ContainsKey("UserName"))
+                        context.Session.SetString("UserName", context.Request.Cookies["UserName"]);
+
+                    if (context.Request.Cookies.ContainsKey("UserEmail"))
+                        context.Session.SetString("UserEmail", context.Request.Cookies["UserEmail"]);
+                }
+
+                await next();
+            });
+
             app.UseRouting();
 
             app.UseAuthorization();
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapRazorPages();
 
             app.Run();
         }
