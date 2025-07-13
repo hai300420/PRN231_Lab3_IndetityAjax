@@ -1,5 +1,5 @@
 ﻿@page
-@model IndexModel
+@model IdentityAjaxClient.Pages.IndexModel
 @{
     ViewData["Title"] = "Home";
 }
@@ -104,6 +104,9 @@
                     <!-- Search bar  -->
                     <div class="search-body p-4">
                         <form method="get" class="row g-3">
+                            <input type="hidden" name="pageNumber" value="@Model.Page" />
+
+
                             <div class="col-md-4">
                                 <div class="form-floating">
                                      <input type="text" class="form-control search-input" id="nameSearch" name="nameSearch"  placeholder="Search by name">
@@ -147,12 +150,8 @@
         </div>
 
         <!-- Product List Section -->
-        <div class="row">
+        <div class="row" id="products">
             <div class="col-12">
-                @if (Model.Products != null && Model.Products.Any())
-                {
-                    <p class="text-success">First Product: @Model.Products[0].ProductName</p>
-                }
 
                 @if (!Model.Products?.Any() ?? true)
                 {
@@ -239,7 +238,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="d-flex justify-content-center mt-4">
+                    @* <div class="d-flex justify-content-center mt-4">
                         <nav>
                             <ul class="pagination">
                                 <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
@@ -257,7 +256,40 @@
                                 </li>
                             </ul>
                         </nav>
-                    </div>
+                    </div> *@
+                    @if (Model.TotalPages > 1)
+                    {
+                        <div class="d-flex justify-content-center mt-4">
+                            <nav aria-label="Product pagination">
+                                <ul class="pagination pagination-lg">
+                                    <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                                        <a class="page-link" asp-page="/Index"
+                                           asp-route-pageNumber="@(Model.Page - 1)"
+                                           asp-route-nameSearch="@Request.Query["nameSearch"]"
+                                           asp-route-isNatural="@Request.Query["isNatural"]"
+                                           asp-route-categoryIdSearch="@Request.Query["categoryIdSearch"]">←</a>
+
+                                    </li>
+
+                                    <li class="page-item disabled">
+                                        <span class="page-link bg-white border-0 text-dark fw-semibold">
+                                            Page @Model.Page of @Model.TotalPages
+                                        </span>
+                                    </li>
+
+                                    <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                                        <a class="page-link text-danger fw-bold" asp-page="/Index"
+                                           asp-route-pageNumber="@(Model.Page + 1)"
+                                           asp-route-nameSearch="@Request.Query["nameSearch"]"
+                                           asp-route-isNatural="@Request.Query["isNatural"]"
+                                           asp-route-categoryIdSearch="@Request.Query["categoryIdSearch"]">→</a>
+
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+
 
                    
                 }
@@ -473,6 +505,14 @@
                 observer.observe(el);
             });
         });
+
+        window.onload = function () {
+            const productSection = document.getElementById('products');
+            if (productSection) {
+                productSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
     </script>
 }
 
@@ -1044,7 +1084,7 @@
         }
 
         /* Pagination */
-        .page-link {
+        /* .page-link {
             width: 45px;
             height: 45px;
             display: flex;
@@ -1057,7 +1097,7 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-
+ */
             .page-link:hover {
                 background: linear-gradient(135deg, #e74c3c, #f39c12);
                 border-color: #e74c3c;
@@ -1086,6 +1126,48 @@
         /* Rounded corners */
         .rounded-4 {
             border-radius: 1rem;
+        }
+
+        .pagination .page-item.numeric .page-link {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50% !important;
+            margin: 0 5px;
+        }
+
+        /* Default page-link */
+        .page-link {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: #e74c3c;
+            border: 2px solid #e9ecef;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            /* Hover effect */
+            .page-link:hover {
+                background: linear-gradient(135deg, #e74c3c, #f39c12);
+                border-color: #e74c3c;
+                color: white;
+                transform: translateY(-2px);
+            }
+
+        /* Active */
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, #e74c3c, #f39c12);
+            border-color: #e74c3c;
+            color: white;
+        }
+
+        /* Disabled */
+        .page-item.disabled .page-link {
+            background-color: transparent;
+            color: #6c757d;
+            border: none;
         }
     </style>
 }

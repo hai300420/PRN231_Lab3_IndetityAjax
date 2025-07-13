@@ -18,7 +18,7 @@ namespace IdentityAjaxClient.Pages
             _httpClient = httpClientFactory.CreateClient("API");
         }
 
-        [BindProperty(SupportsGet = true)]
+        [BindProperty(SupportsGet = true, Name = "pageNumber")]
         public int Page { get; set; } = 1;
 
         public int TotalPages { get; set; }
@@ -31,6 +31,11 @@ namespace IdentityAjaxClient.Pages
 
         public async Task OnGetAsync()
         {
+            _logger.LogInformation("Page = {Page}", Page);
+
+            if (Page <= 0)
+                Page = 1;
+            _logger.LogInformation("Page = {Page}", Page);
             try
             {
                 // Check if current user is customer
