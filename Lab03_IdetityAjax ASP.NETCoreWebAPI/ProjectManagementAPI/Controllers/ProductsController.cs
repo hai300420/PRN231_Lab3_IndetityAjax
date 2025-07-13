@@ -16,19 +16,6 @@ namespace ProjectManagementAPI.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Product>> GetProducts(int page = 1, int pageSize = 6)
         {
-            //var products = repository.GetProducts();
-            //var result = products.Select(p => new ProductDTO
-            //{
-            //    ProductId = p.ProductId,
-            //    ProductName = p.ProductName,
-            //    ProductDescription = p.ProductDescription,
-            //    ProductUrl = p.ProductUrl,
-            //    UnitPrice = p.UnitPrice,
-            //    IsNatural = p.IsNatural,
-            //    CategoryId = p.CategoryId,
-            //    CategoryName = p.Category?.CategoryName
-            //});
-            //return Ok(result);
             var products = repository.GetProducts();
 
             var totalCount = products.Count();
@@ -53,6 +40,32 @@ namespace ProjectManagementAPI.Controllers
                 TotalCount = totalCount
             });
         }
+
+        [HttpGet("{id}")]
+        public ActionResult<ProductDTO> GetProductById(int id)
+        {
+            var product = repository.GetProductById(id);
+
+            if (product == null)
+            {
+                return NotFound(new { Message = $"Product with ID {id} not found." });
+            }
+
+            var productDto = new ProductDTO
+            {
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
+                ProductDescription = product.ProductDescription,
+                ProductUrl = product.ProductUrl,
+                UnitPrice = product.UnitPrice,
+                IsNatural = product.IsNatural,
+                CategoryId = product.CategoryId,
+                CategoryName = product.Category?.CategoryName
+            };
+
+            return Ok(productDto);
+        }
+
 
         [HttpPost]
         public IActionResult PostProduct([FromBody] ProductCreateDTO dto)

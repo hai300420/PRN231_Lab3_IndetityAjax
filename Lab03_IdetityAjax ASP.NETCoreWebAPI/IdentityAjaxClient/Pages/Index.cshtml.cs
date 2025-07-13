@@ -1,5 +1,5 @@
+using DataAccess.DTO;
 using DataAccess.DTO.ProductDTOs;
-using IdentityAjaxClient.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,11 +31,8 @@ namespace IdentityAjaxClient.Pages
 
         public async Task OnGetAsync()
         {
-            _logger.LogInformation("Page = {Page}", Page);
-
             if (Page <= 0)
                 Page = 1;
-            _logger.LogInformation("Page = {Page}", Page);
             try
             {
                 // Check if current user is customer
