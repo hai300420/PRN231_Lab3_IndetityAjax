@@ -1,0 +1,181 @@
+﻿@page
+@model IndexModel
+@{
+}
+
+<div class="container py-5">
+    <!-- Header Section with Botanical Theme -->
+    <div class="botanical-header text-center mb-5 position-relative">
+        <div class="leaf-decoration left-leaf animate-float"></div>
+        <h1 class="display-5 fw-bold section-title">Category Management</h1>
+        <p class="section-subtitle">Organize your orchid collection by categories</p>
+        <div class="leaf-decoration right-leaf animate-float"></div>
+        
+        <div class="d-flex align-items-center justify-content-center mt-4">
+            <div class="divider-leaf"></div>
+            <i class="bi bi-flower3 text-primary mx-3"></i>
+            <div class="divider-leaf"></div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mb-4">
+        <a asp-page="Create" class="btn-botanical btn-primary-botanical">
+            <i class="bi bi-plus-lg me-2"></i>New Category
+        </a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert-botanical @(Model.StatusMessage.StartsWith("Error") ? "alert-danger-botanical" : "alert-success-botanical") mb-4">
+            <i class="bi @(Model.StatusMessage.StartsWith("Error") ? "bi-exclamation-triangle" : "bi-check-circle") me-2"></i>
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Category Cards -->
+    <div class="row g-4">
+
+        @if (Model.Categories != null)
+        {
+            @foreach (var category in Model.Categories)
+            {
+                <div class="col-md-4 col-xl-3">
+                    <div class="card-botanical shadow-botanical h-100 hover-lift">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title orchid-title">@category.CategoryName</h5>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pt-0 p-4">
+                            <div class="d-flex gap-2 w-100">
+                                <a asp-page="./Edit"
+                                   asp-route-id="@category.CategoryId"
+                                   class="btn-botanical btn-outline-botanical flex-grow-1">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a asp-page="./Delete"
+                                   asp-route-id="@category.CategoryId"
+                                   class="btn-botanical btn-outline-botanical flex-grow-1">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- Empty State -->
+        @if (Model.Categories == null || !Model.Categories.Any())
+        {
+            <div class="col-12">
+                <div class="card-botanical shadow-botanical">
+                    <div class="card-body text-center py-5">
+                        <div class="py-5">
+                            <div class="icon-wrapper-botanical mx-auto mb-4" style="background: var(--light-green); color: var(--primary-green);">
+                                <i class="bi bi-folder2-open"></i>
+                            </div>
+                            <h3 class="orchid-title">No Categories Found</h3>
+                            <p class="text-muted mb-4">Start organizing your orchids by creating your first category</p>
+                            <a asp-page="Create" class="btn-botanical btn-primary-botanical">
+                                <i class="bi bi-plus-circle me-2"></i> Add New Category
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+</div>
+
+@section Styles {
+    <style>
+        /* Botanical pagination styling */
+        .pagination-botanical .page-item .page-link {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            border: none;
+            background-color: var(--light-green);
+            color: var(--primary-green);
+            transition: all 0.3s ease;
+        }
+        
+        .pagination-botanical .page-item.active .page-link {
+            background-color: var(--primary-green);
+            color: white;
+        }
+        
+        .pagination-botanical .page-item .page-link:hover:not(.disabled) {
+            background-color: var(--primary-green);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .pagination-botanical .page-item.disabled .page-link {
+            background-color: #f8f9fa;
+            color: #adb5bd;
+        }
+        
+        /* Animation for hover effect */
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        /* Floating animation */
+        @@keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .animate-float {
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        /* Add some padding to badge for better appearance */
+        .badge-botanical {
+            padding: 0.5em 1em;
+        }
+        
+        /* Fix pagination for the theme */
+        .pagination {
+            --bs-pagination-border-radius: 50%;
+        }
+        
+        .page-link {
+            margin: 0 3px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50% !important;
+            border: none;
+            background-color: var(--light-green);
+            color: var(--primary-green);
+            transition: all 0.3s ease;
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--primary-green);
+            color: white;
+        }
+        
+        .page-link:hover:not(.disabled) {
+            background-color: var(--dark-green);
+            color: white;
+        }
+    </style>
+}

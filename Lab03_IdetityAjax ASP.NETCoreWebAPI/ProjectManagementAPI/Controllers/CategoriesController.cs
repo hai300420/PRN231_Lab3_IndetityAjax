@@ -26,6 +26,25 @@ namespace ProjectManagementAPI.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        public ActionResult<CategoryDTO> GetCategoryById(int id)
+        {
+            var category = repository.GetCategoryById(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var dto = new CategoryDTO
+            {
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName
+            };
+
+            return Ok(dto);
+        }
+
+
         [HttpPost]
         public IActionResult PostCategory([FromBody] CategoryCreateDTO dto)
         {
