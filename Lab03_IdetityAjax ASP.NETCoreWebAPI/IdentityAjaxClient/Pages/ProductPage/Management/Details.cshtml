@@ -1,0 +1,113 @@
+﻿@page "{id:int}"
+@model IdentityAjaxClient.Pages.ProductPage.Management.DetailsModel
+
+
+<div class="Product-header">
+    <h1 class="Product-title">Product Details</h1>
+    <p class="text-muted">View complete Product information</p>
+</div>
+
+<!-- Toast messages -->
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="Product-details-container">
+    <div class="row g-0">
+        @if (!string.IsNullOrEmpty(Model.Product.ProductUrl))
+        {
+            <div class="col-md-5">
+                <img src="@Model.Product.ProductUrl"
+                     alt="@Model.Product.ProductName"
+                     class="Product-details-image w-100"
+                     style="object-fit: cover; height: 100%;" />
+            </div>
+        }
+        <div class="col-md-@(string.IsNullOrEmpty(Model.Product.ProductUrl) ? "12" : "7")" style="margin-left: 10px">
+            <div class="Product-details-content">
+                <h2 class="Product-details-title mb-4">@Model.Product.ProductName</h2>
+
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="Product-details-meta-item">
+                            <i class="bi bi-tag"></i>
+                            <div>
+                                <small class="text-muted d-block">Category</small>
+                                <span class="fw-medium">@Model.Product.CategoryName</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="Product-details-meta-item">
+                            <i class="bi bi-currency-dollar"></i>
+                            <div>
+                                <small class="text-muted d-block">Price</small>
+                                <span class="fw-medium Product-price">
+                                    @Model.Product.UnitPrice.ToString("C", new System.Globalization.CultureInfo("en-US"))
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="Product-details-meta-item">
+                            <i class="bi bi-flower1"></i>
+                            <div>
+                                <small class="text-muted d-block">Type</small>
+                                <span class="Product-badge @(Model.Product.IsNatural.GetValueOrDefault() ? "Product-badge-natural" : "Product-badge-hybrid")">
+                                    @(Model.Product.IsNatural.GetValueOrDefault() ? "Natural" : "Hybrid")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="mb-2">Description</h5>
+                    <p class="Product-details-description">
+                        @Model.Product.ProductDescription
+                    </p>
+                </div>
+
+                <div class="mt-4 pt-3 border-top">
+                    <div class="d-flex gap-2">
+                        <a asp-page="./Edit"
+                           asp-route-id="@Model.Product.ProductId"
+                           class="btn Product-btn Product-btn-primary">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </a>
+                        <a asp-page="./Index"
+                           class="btn Product-btn Product-btn-outline">
+                            <i class="bi bi-arrow-left me-1"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card img {
+            transition: transform 0.3s ease;
+        }
+
+            .card img:hover {
+                transform: scale(1.05);
+            }
+    </style>
+}

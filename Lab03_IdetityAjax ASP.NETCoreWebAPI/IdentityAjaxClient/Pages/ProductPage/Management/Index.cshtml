@@ -1,0 +1,198 @@
+﻿@page
+@model IdentityAjaxClient.Pages.ProductPage.Management.IndexModel
+@{
+
+}
+
+
+<div class="orchid-header">
+    <div class="management-header">
+        <h1 class="orchid-title">Orchid Management</h1>
+        <div class="management-action">
+            <a asp-page="Create" class="btn orchid-btn orchid-btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Create New Orchid
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter Form -->
+<form method="get" class="orchid-search">
+    <div class="row g-3">
+        <div class="col-md-2">
+            <label for="nameSearch" class="form-label">Name</label>
+            <input type="text" class="form-control" id="nameSearch" name="nameSearch" value="@Model.NameSearch">
+        </div>
+        <div class="col-md-2">
+            <label for="categoryIdSearch" class="form-label">Category</label>
+            <select class="form-select" id="categoryIdSearch" name="categoryIdSearch">
+                <option value="">All Categories</option>
+                @if (Model.CategoryList != null)
+                {
+                    @foreach (var item in Model.CategoryList)
+                    {
+                        var isSelected = item.Value == Model.CategoryIdSearch?.ToString();
+                        <option value="@item.Value" selected="@(isSelected ? "selected" : null)">
+                            @item.Text
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="isNatural" class="form-label">Natural Type</label>
+            <select class="form-select" asp-for="IsNatural">
+                <option value="">All</option>
+                <option value="true">Natural</option>
+                <option value="false">Hybrid</option>
+            </select>
+        </div>
+        <div class="col-md-2 align-self-end">
+            <button type="submit" class="btn orchid-btn orchid-btn-primary w-100">
+                <i class="bi bi-search me-1"></i> Search
+            </button>
+        </div>
+        <div class="col-md-2 align-self-end">
+            <a asp-page="./Index" class="btn orchid-btn orchid-btn-outline w-100">
+                <i class="bi bi-x-circle me-1"></i> Clear
+            </a>
+        </div>
+    </div>
+</form>
+
+<!-- Results Cards -->
+<div class="mb-1 pb-1">
+    @if (!Model.Products.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i> No orchids found matching your criteria.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var item in Model.Products)
+            {
+                <div class="col">
+                    <div class="orchid-card h-100">
+                        <div class="position-relative">
+                            @if (!string.IsNullOrEmpty(item.ProductUrl))
+                            {
+                                <img src="@item.ProductUrl"
+                                     class="card-img-top"
+                                     alt="@item.ProductName"
+                                     style="height: 200px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light d-flex align-items-center justify-content-center"
+                                     style="height: 200px;">
+                                    <i class="bi bi-flower1 text-muted" style="font-size: 2rem;"></i>
+                                </div>
+                            }
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="orchid-badge @(item.IsNatural.GetValueOrDefault() ? "orchid-badge-natural" : "orchid-badge-hybrid")">
+                                    @(item.IsNatural.GetValueOrDefault() ? "Natural" : "Hybrid")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate" title="@item.ProductName">@item.ProductName</h5>
+                            <p class="card-text mb-1">
+                                <small class="text-muted">
+                                    <i class="bi bi-tag"></i> @(item.CategoryName ?? "No Category")
+                                </small>
+                            </p>
+                            <p class="card-text mb-2">
+                                <span class="orchid-price">
+                                    @item.UnitPrice.ToString("C", new System.Globalization.CultureInfo("en-US"))
+                                </span>
+                            </p>
+                            <p class="card-text" style="height: 4.5em; overflow: hidden;">
+                                <small>
+                                    @(item.ProductDescription?.Length > 100
+                                        ? item.ProductDescription[..100] + "..."
+                                        : item.ProductDescription)
+                                </small>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex gap-2">
+                                <a asp-page="./Edit"
+                                   asp-route-id="@item.ProductId"
+                                   class="btn btn-sm orchid-btn orchid-btn-outline flex-grow-1">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a asp-page="./Details"
+                                   asp-route-id="@item.ProductId"
+                                   class="btn btn-sm orchid-btn orchid-btn-outline flex-grow-1">
+                                    <i class="bi bi-info-circle"></i> Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Product pagination">
+                    <ul class="pagination pagination-lg">
+                        <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-page="/ProductPage/Management/Index"
+                               asp-route-pageNumber="@(Model.PageNumber - 1)"
+                               asp-route-nameSearch="@Request.Query["nameSearch"]"
+                               asp-route-isNatural="@Request.Query["isNatural"]"
+                               asp-route-categoryIdSearch="@Request.Query["categoryIdSearch"]">←</a>
+
+                        </li>
+
+                        <li class="page-item disabled">
+                            <span class="page-link bg-white border-0 text-dark fw-semibold">
+                                Page @Model.PageNumber of @Model.TotalPages
+                            </span>
+                        </li>
+
+                        <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link text-danger fw-bold" asp-page="/ProductPage/Management/Index"
+                               asp-route-pageNumber="@(Model.PageNumber + 1)"
+                               asp-route-nameSearch="@Request.Query["nameSearch"]"
+                               asp-route-isNatural="@Request.Query["isNatural"]"
+                               asp-route-categoryIdSearch="@Request.Query["categoryIdSearch"]">→</a>
+
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            transition: transform 0.2s ease-in-out;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+            }
+
+        .card-img-top {
+            border-top-left-radius: var(--bs-card-inner-border-radius);
+            border-top-right-radius: var(--bs-card-inner-border-radius);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+        }
+    </style>
+}

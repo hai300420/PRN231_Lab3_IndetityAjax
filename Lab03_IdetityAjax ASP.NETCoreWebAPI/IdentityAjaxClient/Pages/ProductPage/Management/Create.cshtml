@@ -1,0 +1,135 @@
+﻿@page
+@model IdentityAjaxClient.Pages.ProductPage.Management.CreateModel
+
+@{
+
+}
+
+<div class="Product-header">
+    <h1 class="Product-title">Create New Product</h1>
+    <p class="text-muted">Add a new Product to your collection</p>
+</div>
+
+<!-- Toast messages -->
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="Product-form">
+            <form method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.ProductName" class="form-label">Name</label>
+                    <input asp-for="Product.ProductName" class="form-control" />
+                    <span asp-validation-for="Product.ProductName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.CategoryId" class="form-label">Category</label>
+                    <select asp-for="Product.CategoryId" class="form-select" asp-items="Model.CategoryList" required>
+                    </select>
+                    <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.UnitPrice" class="form-label">UnitPrice</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="Product.UnitPrice" class="form-control" type="number" step="0.01" value="1" required />
+                    </div>
+                    <span asp-validation-for="Product.UnitPrice" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.IsNatural" class="form-label">Type</label>
+                    <select asp-for="Product.IsNatural" class="form-select" required>
+                        <option value="true">Natural</option>
+                        <option value="false">Hybrid</option>
+                    </select>
+                    <span asp-validation-for="Product.IsNatural" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.ProductDescription" class="form-label">Description</label>
+                    <textarea asp-for="Product.ProductDescription" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Product.ProductDescription" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Image</label>
+                    <input type="file" name="ImageFile" class="form-control" accept="image/*" />
+                    <div class="form-text">Allowed file types: .jpg, .jpeg, .png, .gif</div>
+                </div>
+
+                @* Preview image *@
+                <div class="mb-3" id="imagePreview" style="display:none;">
+                    <img id="preview" src="#" alt="Preview" style="max-width: 200px; max-height: 200px;" class="mt-2 rounded shadow-sm" />
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn Product-btn Product-btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i> Create
+                    </button>
+                    <a asp-page="./Index" class="btn Product-btn Product-btn-outline">
+                        <i class="bi bi-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-4 d-none d-md-block">
+        <div class="card border-0 bg-light h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-flower1 display-1 text-primary"></i>
+                </div>
+                <h5 class="card-title">Product Care Tips</h5>
+                <p class="card-text">Remember to include detailed care instructions in your description to help customers succeed with their new orchids.</p>
+                <ul class="text-start small">
+                    <li>Light requirements</li>
+                    <li>Watering frequency</li>
+                    <li>Temperature range</li>
+                    <li>Humidity preferences</li>
+                    <li>Fertilization needs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Image preview functionality
+        document.querySelector('input[name="ImageFile"]').addEventListener('change', function (e) {
+            var preview = document.getElementById('preview');
+            var previewDiv = document.getElementById('imagePreview');
+
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                }
+
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    </script>
+}

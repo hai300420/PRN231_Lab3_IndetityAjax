@@ -13,12 +13,67 @@ namespace ProjectManagementAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private IProductRepository repository = new ProductRepository();
+        //[HttpGet]
+        //public ActionResult<IEnumerable<Product>> GetProducts(int page = 1, int pageSize = 6)
+        //{
+        //    var products = repository.GetProducts();
+
+        //    var totalCount = products.Count();
+        //    var items = products
+        //        .Skip((page - 1) * pageSize)
+        //        .Take(pageSize)
+        //        .Select(p => new ProductDTO
+        //        {
+        //            ProductId = p.ProductId,
+        //            ProductName = p.ProductName,
+        //            ProductDescription = p.ProductDescription,
+        //            ProductUrl = p.ProductUrl,
+        //            UnitPrice = p.UnitPrice,
+        //            IsNatural = p.IsNatural,
+        //            CategoryId = p.CategoryId,
+        //            CategoryName = p.Category?.CategoryName
+        //        }).ToList();
+
+        //    return Ok(new PagedResult<ProductDTO>
+        //    {
+        //        Items = items,
+        //        TotalCount = totalCount
+        //    });
+        //}
+
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetProducts(int page = 1, int pageSize = 6)
+        public ActionResult<PagedResult<ProductDTO>> GetProducts(
+             int? id = null,
+             string? name = null,
+             int? categoryId = null,
+             bool? isNatural = null,
+             int page = 1,
+             int pageSize = 6)
         {
             var products = repository.GetProducts();
 
+            if (id.HasValue)
+            {
+                products = products.Where(p => p.ProductId == id.Value).ToList();
+            }
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                products = products.Where(p => p.ProductName.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (categoryId.HasValue)
+            {
+                products = products.Where(p => p.CategoryId == categoryId.Value).ToList();
+            }
+
+            if (isNatural.HasValue)
+            {
+                products = products.Where(p => p.IsNatural == isNatural.Value).ToList();
+            }
+
             var totalCount = products.Count();
+
             var items = products
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -40,6 +95,7 @@ namespace ProjectManagementAPI.Controllers
                 TotalCount = totalCount
             });
         }
+
 
         [HttpGet("{id}")]
         public ActionResult<ProductDTO> GetProductById(int id)
@@ -88,7 +144,7 @@ namespace ProjectManagementAPI.Controllers
             });
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public IActionResult UpdateProduct(int id, [FromBody] ProductUpdateDTO dto)
         {
             var existing = repository.GetProductById(id);
@@ -109,7 +165,7 @@ namespace ProjectManagementAPI.Controllers
             });
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public IActionResult DeleteProduct(int id)
         {
             var product = repository.GetProductById(id);

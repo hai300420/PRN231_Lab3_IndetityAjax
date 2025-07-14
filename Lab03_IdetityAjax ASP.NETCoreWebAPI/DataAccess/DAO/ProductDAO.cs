@@ -10,22 +10,28 @@ namespace DataAccess.DAO
 {
     public class ProductDAO
     {
-        public static List<Product> GetProducts()
+        //public static List<Product> GetProducts()
+        //{
+        //    var listProducts = new List<Product>();
+        //    try
+        //    {
+        //        using (var context = new MyStoreDbContext())
+        //        {
+        //            listProducts = context.Products.Include(p => p.Category).ToList();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //    return listProducts;
+        //}
+
+        public static IQueryable<Product> GetProducts(MyStoreDbContext context)
         {
-            var listProducts = new List<Product>();
-            try
-            {
-                using (var context = new MyStoreDbContext())
-                {
-                    listProducts = context.Products.Include(p => p.Category).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return listProducts;
+            return context.Products.Include(p => p.Category).AsQueryable();
         }
+
 
         public static Product FindProductById(int proId)
         {

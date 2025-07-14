@@ -1,0 +1,170 @@
+﻿@page "{id:int}"
+@model IdentityAjaxClient.Pages.ProductPage.Management.EditModel
+@{
+}
+
+<div class="Product-header">
+    <h1 class="Product-title">Edit Product</h1>
+    <p class="text-muted">Update Product information</p>
+</div>
+
+<!-- Toast messages -->
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="Product-form">
+            <form method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.ProductName" class="form-label">Name</label>
+                    <input asp-for="Product.ProductName" class="form-control" />
+                    <span asp-validation-for="Product.ProductName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.CategoryId" class="form-label">Category</label>
+                    <select asp-for="Product.CategoryId" class="form-select" asp-items="Model.CategoryList" required>
+                    </select>
+                    <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.UnitPrice" class="form-label">UnitPrice</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="Product.UnitPrice" class="form-control" type="number" step="0.01" required />
+                    </div>
+                    <span asp-validation-for="Product.UnitPrice" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.IsNatural" class="form-label">Type</label>
+                    <select asp-for="Product.IsNatural" class="form-select" required>
+                        <option value="true">Natural</option>
+                        <option value="false">Hybrid</option>
+                    </select>
+                    <span asp-validation-for="Product.IsNatural" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.ProductDescription" class="form-label">Description</label>
+                    <textarea asp-for="Product.ProductDescription" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Product.ProductDescription" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Image</label>
+                    @if (!string.IsNullOrEmpty(Model.Product.ProductUrl))
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@Model.Product.ProductUrl"
+                                     alt="Current Image"
+                                     class="img-thumbnail rounded"
+                                     style="max-width: 150px; max-height: 150px;" />
+                                <input type="hidden" asp-for="Product.ProductUrl" />
+                                <div>
+                                    <p class="mb-1 fw-medium">Current Image</p>
+                                    <small class="text-muted">
+                                        Upload a new image below to replace this one
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="mt-2">
+                        <label class="form-label">@(Model.Product.ProductUrl == null ? "Upload Image:" : "Change Image:")</label>
+                        <input type="file"
+                               name="ImageFile"
+                               class="form-control"
+                               accept="image/*" />
+                        <div class="form-text">
+                            Allowed types: .jpg, .jpeg, .png, .gif
+                        </div>
+                    </div>
+                    <div id="imagePreview" class="mt-3" style="display:none;">
+                        <label class="form-label">Preview:</label>
+                        <img id="preview" src="#"
+                             alt="Preview"
+                             class="img-thumbnail rounded"
+                             style="max-width: 150px; max-height: 150px;" />
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn Product-btn Product-btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                    <a asp-page="./Index" class="btn Product-btn Product-btn-outline">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-light h-100">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-3">Editing Tips</h5>
+                <ul class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent border-0 ps-0">
+                        <i class="bi bi-image-fill text-primary me-2"></i>
+                        High-quality images help sell orchids
+                    </li>
+                    <li class="list-group-item bg-transparent border-0 ps-0">
+                        <i class="bi bi-pencil-fill text-primary me-2"></i>
+                        Be descriptive about care requirements
+                    </li>
+                    <li class="list-group-item bg-transparent border-0 ps-0">
+                        <i class="bi bi-tag-fill text-primary me-2"></i>
+                        Select the correct category for better search results
+                    </li>
+                    <li class="list-group-item bg-transparent border-0 ps-0">
+                        <i class="bi bi-flower1 text-primary me-2"></i>
+                        Specify whether it's a natural or hybrid variety
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Image preview functionality
+        document.querySelector('input[name="ImageFile"]').addEventListener('change', function (e) {
+            var preview = document.getElementById('preview');
+            var previewDiv = document.getElementById('imagePreview');
+
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                }
+
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewDiv.style.display = 'none';
+            }
+        });
+    </script>
+}

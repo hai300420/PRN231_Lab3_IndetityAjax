@@ -21,10 +21,16 @@ namespace Repositories
             return ProductDAO.FindProductById(id);
         }
 
+        //public List<Product> GetProducts()
+        //{
+        //    return ProductDAO.GetProducts();
+        //}
         public List<Product> GetProducts()
         {
-            return ProductDAO.GetProducts();
+            using var context = new MyStoreDbContext();
+            return ProductDAO.GetProducts(context).ToList();
         }
+
 
         public void SaveProduct(Product p)
         {
