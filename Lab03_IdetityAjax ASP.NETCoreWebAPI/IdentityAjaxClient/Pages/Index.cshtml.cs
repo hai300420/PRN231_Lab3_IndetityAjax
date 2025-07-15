@@ -1,4 +1,5 @@
 using DataAccess.DTO;
+using DataAccess.DTO.CartDTOs;
 using DataAccess.DTO.ProductDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -87,5 +88,104 @@ namespace IdentityAjaxClient.Pages
                 Products = new List<ProductDTO>();
             }
         }
+
+        public async Task<IActionResult> OnPostAddToCartAsync(int orchidId, int quantity = 1)
+        {
+            if (orchidId <= 0)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "Invalid orchid ID."
+                });
+            }
+
+            // Ensure quantity is at least 1
+            quantity = Math.Max(1, quantity);
+
+            try
+            {
+                // Get user ID from session
+                var userId = HttpContext.Session.GetString("UserId");
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return RedirectToPage("/AuthPage/Login");
+                }
+
+                // Fetch the orchid from API to get its details
+                // var orchidResponse = await _httpClient.GetAsync($"products?id={orchidId}");
+                var orchidResponse = await _httpClient.GetAsync($"products/{orchidId}");
+
+                if (!orchidResponse.IsSuccessStatusCode)
+                {
+                    return NotFound();
+                }
+
+                // var orchidPaginatedList = await orchidResponse.Content.ReadFromJsonAsync<PagedResultDetail<Product>>();
+                // Product? orchid = orchidPaginatedList?.Items.FirstOrDefault();
+                var orchid = await orchidResponse.Content.ReadFromJsonAsync<ProductDTO>();
+
+
+
+
+                if (orchid == null)
+                {
+                    TempData["ErrorMessage"] = "Could not find the specified orchid.";
+                    return RedirectToPage();
+                }
+
+                // Get current cart
+                var cartJson = HttpContext.Session.GetString("Cart");
+                var cart = string.IsNullOrEmpty(cartJson)
+                    ? new List<CartItem>()
+                    : JsonSerializer.Deserialize<List<CartItem>>(cartJson);
+
+                if (cart == null)
+                {
+                    cart = new List<CartItem>();
+                }
+
+                // Add item to cart
+                var existingItem = cart.FirstOrDefault(x => x.OrchidId == orchidId);
+                if (existingItem != null)
+                {
+                    existingItem.Quantity += quantity;
+                }
+                else
+                {
+                    // cart.Add(new CartItem { OrchidId = orchidId, Quantity = quantity });
+                    cart.Add(new CartItem
+                    {
+                        OrchidId = orchidId,
+                        Quantity = quantity,
+                        Price = orchid.UnitPrice
+                    });
+
+                }
+
+                // Save cart
+                HttpContext.Session.SetString("Cart", JsonSerializer.Serialize(cart));
+
+                // Make sure the response type is set to JSON
+                Response.ContentType = "application/json";
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    message = existingItem != null
+                        ? $"{orchid.ProductName} quantity increased by {quantity} in your cart!"
+                        : $"{orchid.ProductName} added to your cart with quantity {quantity}!",
+                    cartCount = cart.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding item to cart");
+                TempData["ErrorMessage"] = $"Error adding item to cart: {ex.Message}";
+                return RedirectToPage();
+            }
+        }
+
     }
 }

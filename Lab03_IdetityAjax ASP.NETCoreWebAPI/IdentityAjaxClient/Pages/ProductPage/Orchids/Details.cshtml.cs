@@ -7,6 +7,9 @@ using BusinessObjects;
 using static System.Net.Mime.MediaTypeNames;
 using System.Runtime.CompilerServices;
 using System;
+using IdentityAjaxClient.Model;
+using DataAccess.DTO.CartDTOs;
+using DataAccess.DTO;
 
 namespace IdentityAjaxClient.Pages.ProductPage.Orchids
 {
@@ -23,13 +26,16 @@ namespace IdentityAjaxClient.Pages.ProductPage.Orchids
         }
 
         public ProductDTO Product { get; set; } = new();
-
+        public bool IsCustomer = false;
+        [BindProperty(SupportsGet = true)]
         public string? ErrorMessage { get; set; }
         public bool IsProductLoaded { get; set; } = false;
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
             _logger.LogInformation("Details page requested for Product ID: {Id}", id);
+            // Check if user is logged in and is a customer
+            IsCustomer = HttpContext.Session.GetString("UserRole") == "Customer";
 
             if (id <= 0)
             {
@@ -83,121 +89,106 @@ namespace IdentityAjaxClient.Pages.ProductPage.Orchids
             return Page();
         }
 
+        public async Task<IActionResult> OnPostAddToCartAsync(int orchidId, int quantity = 1)
+        {
+            if (orchidId <= 0)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "Invalid orchid ID."
+                });
+            }
+
+            // Ensure quantity is at least 1
+            quantity = Math.Max(1, quantity);
+
+            try
+            {
+                // Get user ID from session
+                var userId = HttpContext.Session.GetString("UserId");
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return RedirectToPage("/AuthPage/Login");
+                }
+
+                // Fetch the orchid from API to get its details
+                // var orchidResponse = await _httpClient.GetAsync($"products?id={orchidId}");
+                var orchidResponse = await _httpClient.GetAsync($"products/{orchidId}");
+
+                if (!orchidResponse.IsSuccessStatusCode)
+                {
+                    return NotFound();
+                }
+
+                // var orchidPaginatedList = await orchidResponse.Content.ReadFromJsonAsync<PagedResultDetail<Product>>();
+                // Product? orchid = orchidPaginatedList?.Items.FirstOrDefault();
+                var orchid = await orchidResponse.Content.ReadFromJsonAsync<ProductDTO>();
+
+
+                
+
+                if (orchid == null)
+                {
+                    TempData["ErrorMessage"] = "Could not find the specified orchid.";
+                    return RedirectToPage();
+                }
+
+                // Get current cart
+                var cartJson = HttpContext.Session.GetString("Cart");
+                var cart = string.IsNullOrEmpty(cartJson)
+                    ? new List<CartItem>()
+                    : JsonSerializer.Deserialize<List<CartItem>>(cartJson);
+
+                if (cart == null)
+                {
+                    cart = new List<CartItem>();
+                }
+
+                // Add item to cart
+                var existingItem = cart.FirstOrDefault(x => x.OrchidId == orchidId);
+                if (existingItem != null)
+                {
+                    existingItem.Quantity += quantity;
+                }
+                else
+                {
+                    // cart.Add(new CartItem { OrchidId = orchidId, Quantity = quantity });
+                    cart.Add(new CartItem
+                    {
+                        OrchidId = orchidId,
+                        Quantity = quantity,
+                        Price = orchid.UnitPrice 
+                    });
+
+                }
+
+                // Save cart
+                HttpContext.Session.SetString("Cart", JsonSerializer.Serialize(cart));
+
+                // Make sure the response type is set to JSON
+                Response.ContentType = "application/json";
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    message = existingItem != null
+                        ? $"{orchid.ProductName} quantity increased by {quantity} in your cart!"
+                        : $"{orchid.ProductName} added to your cart with quantity {quantity}!",
+                    cartCount = cart.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding item to cart");
+                TempData["ErrorMessage"] = $"Error adding item to cart: {ex.Message}";
+                return RedirectToPage();
+            }
+        }
+
 
     }
 }
 
 
-
-//@page "{id:int}"
-//@model IdentityAjaxClient.Pages.ProductPage.Orchids.DetailsModel
-//@{
-//    ViewData["Title"] = "Orchid Details";
-//}
-
-//<div class="container py-5">
-//    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-//    {
-//        <div class="alert alert-danger">
-//            <strong>Error:</strong> @Model.ErrorMessage
-//        </div>
-//    }
-//    else if (!Model.IsProductLoaded)
-//    {
-//        <div class="alert alert-info">
-//            Loading product details...
-//        </div>
-//    }
-//    else
-//    {
-//        <div class="row">
-//            <div class="col-md-6">
-//                @if (!string.IsNullOrEmpty(Model.Product.ProductUrl))
-//                {
-//                    <img src="@Model.Product.ProductUrl" alt="@Model.Product.ProductName" class="img-fluid rounded shadow" />
-//                }
-//                else
-//                {
-//                    <div class="bg-light d-flex justify-content-center align-items-center" style="height: 300px;">
-//                        <span class="text-muted">No image available</span>
-//                    </div>
-//                }
-//            </div>
-//            <div class="col-md-6">
-//                <h2>@Model.Product.ProductName</h2>
-//                <p class="text-muted">@Model.Product.CategoryName</p>
-
-//                <h4 class="text-danger">@Model.Product.UnitPrice.ToString("C", new System.Globalization.CultureInfo("en-US"))</h4>
-
-//                <p class="mt-3">
-//                    @if (string.IsNullOrEmpty(Model.Product.ProductDescription))
-//                    {
-//                        <em>No description available.</em>
-//                    }
-//                    else
-//                    {
-//                        @Model.Product.ProductDescription
-//                    }
-//                </p>
-
-//                <p><strong>Type:</strong> @(Model.Product.IsNatural == true ? "Natural" : "Hybrid")</p>
-//            </div>
-//        </div>
-//    }
-//</div>
-//@page "{id:int}"
-//@model IdentityAjaxClient.Pages.ProductPage.Orchids.DetailsModel
-//@{
-//    ViewData["Title"] = "Orchid Details";
-//}
-
-//<div class="container py-5">
-//    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-//    {
-//        <div class="alert alert-danger">
-//            <strong>Error:</strong> @Model.ErrorMessage
-//        </div>
-//    }
-//    else if (!Model.IsProductLoaded)
-//    {
-//        <div class="alert alert-info">
-//            Loading product details...
-//        </div>
-//    }
-//    else
-//    {
-//        <div class="row">
-//            <div class="col-md-6">
-//                @if (!string.IsNullOrEmpty(Model.Product.ProductUrl))
-//                {
-//                    <img src="@Model.Product.ProductUrl" alt="@Model.Product.ProductName" class="img-fluid rounded shadow" />
-//                }
-//                else
-//                {
-//                    <div class="bg-light d-flex justify-content-center align-items-center" style="height: 300px;">
-//                        <span class="text-muted">No image available</span>
-//                    </div>
-//                }
-//            </div>
-//            <div class="col-md-6">
-//                <h2>@Model.Product.ProductName</h2>
-//                <p class="text-muted">@Model.Product.CategoryName</p>
-
-//                <h4 class="text-danger">@Model.Product.UnitPrice.ToString("C", new System.Globalization.CultureInfo("en-US"))</h4>
-
-//                <p class="mt-3">
-//                    @if (string.IsNullOrEmpty(Model.Product.ProductDescription))
-//                    {
-//                        <em>No description available.</em>
-//                    }
-//                    else
-//                    {
-//                        @Model.Product.ProductDescription
-//                    }
-//                </p>
-
-//                <p><strong>Type:</strong> @(Model.Product.IsNatural == true ? "Natural" : "Hybrid")</p>
-//            </div>
-//        </div>
-//    }
-//</div>
