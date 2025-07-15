@@ -3,6 +3,7 @@ using DataAccess.DTO.ProductDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace IdentityAjaxClient.Pages
@@ -29,8 +30,21 @@ namespace IdentityAjaxClient.Pages
 
         public string? ErrorMessage { get; set; }
 
+        // Show token to check
+        public List<Claim> UserClaims { get; set; } = new();
+
+
         public async Task OnGetAsync()
         {
+            // Info in token
+            var token = HttpContext.Session.GetString("JWToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                var claims = JwtHelper.DecodeJwt(token);
+                UserClaims = claims.ToList();
+            }
+            // end token
             if (Page <= 0)
                 Page = 1;
             try

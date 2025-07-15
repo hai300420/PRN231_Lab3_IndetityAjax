@@ -79,6 +79,7 @@ namespace ProjectManagementAPI.Controllers
             new Claim(ClaimTypes.Email, account.Email!),
             new Claim(ClaimTypes.Name, account.AccountName ?? account.Email!),
             new Claim(ClaimTypes.Role, account.Role?.RoleName ?? "Customer"),
+            new Claim("AccountId", account.AccountId.ToString())
         };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
@@ -94,12 +95,6 @@ namespace ProjectManagementAPI.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-    }
-
-    public class LoginRequest
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
     }
 
     public class RegisterRequest

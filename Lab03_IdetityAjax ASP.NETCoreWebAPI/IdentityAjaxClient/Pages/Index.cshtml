@@ -4,6 +4,31 @@
     ViewData["Title"] = "Home";
 }
 
+<!-- Token Section -->
+@* @if (Model.UserClaims.Any())
+{
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Your JWT Token Information</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                @foreach (var claim in Model.UserClaims)
+                {
+                    <li class="list-group-item">
+                        <strong>@claim.Type:</strong> @claim.Value
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">You are not logged in.</div>
+} *@
+<!-- End Token Section -->
+
 <!-- Hero Section -->
 <div class="hero-section position-relative mb-5">
     <div class="hero-overlay"></div>

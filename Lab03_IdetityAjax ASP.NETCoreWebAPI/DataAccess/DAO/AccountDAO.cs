@@ -51,19 +51,50 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void UpdateAccount(Account account)
+        //public static void UpdateAccount(Account account)
+        //{
+        //    try
+        //    {
+        //        using var context = new MyStoreDbContext();
+        //        context.Entry(account).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+        //        context.SaveChanges();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
+
+        public static void UpdateAccount(Account updatedAccount)
         {
             try
             {
                 using var context = new MyStoreDbContext();
-                context.Entry(account).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                var existing = context.Accounts.FirstOrDefault(a => a.AccountId == updatedAccount.AccountId);
+                if (existing == null) throw new Exception("Account not found.");
+
+                existing.AccountName = updatedAccount.AccountName;
+                existing.Email = updatedAccount.Email;
+
+                if (!string.IsNullOrEmpty(updatedAccount.Password))
+                    existing.Password = updatedAccount.Password;
+
+                existing.RoleId = updatedAccount.RoleId;
+
                 context.SaveChanges();
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
-                throw new Exception(ex.Message);
+                Console.WriteLine("EF Core SaveChanges failed.");
+                Console.WriteLine("Message: " + ex.Message);
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine("Inner Exception: " + ex.InnerException.Message);
+                }
+                throw;
             }
         }
+
 
         public static void DeleteAccount(int id)
         {

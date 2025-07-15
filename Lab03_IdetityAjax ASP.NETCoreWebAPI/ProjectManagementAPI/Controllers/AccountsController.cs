@@ -7,6 +7,7 @@ using DataAccess.DTO.AccountDTOs;
 using DataAccess.DTO.CategoryDTOs;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Identity.Client;
+using DataAccess.DTO;
 
 namespace ProjectManagementAPI.Controllers
 {
@@ -16,27 +17,109 @@ namespace ProjectManagementAPI.Controllers
     {
         private readonly IAccountRepository repository = new AccountRepository();
 
+        //[HttpGet]
+        //public ActionResult<IEnumerable<Account>> GetAccounts()
+        //{
+        //    var accounts = repository.GetAccounts();
+        //    var result = accounts.Select(c => new AccountDTO
+        //    {
+        //        AccountId = c.AccountId,
+        //        AccountName = c.AccountName,
+        //        Email = c.Email,
+        //        RoleId = c.RoleId,
+        //        RoleName = c.Role?.RoleName
+        //    });
+
+        //    return Ok(result);
+        //}
+
+        //[HttpGet("{id}")]
+        //public ActionResult<Account> GetAccount(int id)
+        //{
+        //    var account = repository.GetAccountById(id);
+        //    return account == null ? NotFound() : Ok(account);
+        //}
+
         [HttpGet]
-        public ActionResult<IEnumerable<Account>> GetAccounts()
+        public ActionResult<PagedResult<AccountDTO>> GetAccounts(
+        int? id = null,
+        string? email = null,
+        string? name = null,
+        int? roleId = null,
+        int page = 1,
+        int pageSize = 10)
         {
             var accounts = repository.GetAccounts();
-            var result = accounts.Select(c => new AccountDTO
+
+            // Filtering
+            if (id.HasValue)
             {
-                AccountId = c.AccountId,
-                AccountName = c.AccountName,
-                Email = c.Email,
-                RoleId = c.RoleId,
-                RoleName = c.Role?.RoleName
+                accounts = accounts.Where(a => a.AccountId == id.Value).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                accounts = accounts.Where(a =>
+                    a.Email != null &&
+                    a.Email.Contains(email, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                accounts = accounts.Where(a =>
+                    a.AccountName != null &&
+                    a.AccountName.Contains(name, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            if (roleId.HasValue)
+            {
+                accounts = accounts.Where(a => a.RoleId == roleId.Value).ToList();
+            }
+
+            var totalCount = accounts.Count();
+
+            var items = accounts
+                .OrderBy(a => a.AccountName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new AccountDTO
+                {
+                    AccountId = a.AccountId,
+                    AccountName = a.AccountName,
+                    Email = a.Email,
+                    RoleId = a.RoleId,
+                    RoleName = a.Role?.RoleName
+                })
+                .ToList();
+
+            return Ok(new PagedResultDetail<AccountDTO>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
             });
-
-            return Ok(result);
         }
-
+        
         [HttpGet("{id}")]
-        public ActionResult<Account> GetAccount(int id)
+        public ActionResult<AccountDTO> GetAccount(int id)
         {
-            var account = repository.GetAccountById(id);
-            return account == null ? NotFound() : Ok(account);
+            var a = repository.GetAccountById(id);
+            if (a == null) return NotFound();
+
+            var dto = new AccountDTO
+            {
+                AccountId = a.AccountId,
+                AccountName = a.AccountName,
+                Email = a.Email,
+                RoleId = a.RoleId,
+                RoleName = a.Role?.RoleName
+            };
+
+            return Ok(dto);
         }
 
         [HttpPost]
@@ -66,7 +149,11 @@ namespace ProjectManagementAPI.Controllers
 
             acc.AccountName = dto.AccountName;
             acc.Email = dto.Email;
-            acc.Password = dto.Password;
+            // acc.Password = dto.Password;
+            if (string.IsNullOrEmpty(dto.Password))
+            {
+                acc.Password = acc.Password;
+            }
             acc.RoleId = dto.RoleId;
 
             repository.UpdateAccount(acc);
