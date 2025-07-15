@@ -159,12 +159,19 @@ namespace ProjectManagementAPI.Controllers
                 TotalAmount = dto.TotalAmount
             };
 
+            if (string.IsNullOrEmpty(order.OrderStatus))
+            {
+                order.OrderStatus = OrderStatusEnum.Pending.ToString();
+            }
+
             repository.SaveOrder(order);
-            return Ok(new 
-            { 
-                Status = "success", 
-                Message = "Order created successfully." 
-            });
+            //return Ok(new 
+            //{ 
+            //    Status = "success", 
+            //    Message = "Order created successfully." 
+            //});
+            return Ok(order); 
+
         }
 
         [HttpPut("{id}")]

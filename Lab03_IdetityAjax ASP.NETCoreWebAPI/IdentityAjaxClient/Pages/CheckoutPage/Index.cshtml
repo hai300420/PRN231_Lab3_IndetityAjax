@@ -1,0 +1,230 @@
+﻿@page
+@model IdentityAjaxClient.Pages.CheckoutPage.IndexModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4 botanical-breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a asp-page="/CartPage/Index" class="text-decoration-none">Shopping Cart</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="botanical-header text-center mb-5 position-relative animate-fade-in-up">
+        <div class="leaf-decoration left-leaf animate-float"></div>
+        <h1 class="display-5 fw-bold mb-2 section-title">Complete Your Order</h1>
+        <p class="section-subtitle">Review and confirm your beautiful orchids</p>
+        <div class="leaf-decoration right-leaf animate-float"></div>
+
+        <div class="d-flex align-items-center justify-content-center mt-4">
+            <div class="divider-leaf"></div>
+            <i class="bi bi-flower3 text-primary mx-3"></i>
+            <div class="divider-leaf"></div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert-botanical alert-danger-botanical mb-4">
+            <i class="bi bi-exclamation-circle me-2"></i> @Model.ErrorMessage
+        </div>
+    }
+
+    <form method="post">
+        <div class="row g-4">
+            <!-- Order Summary -->
+            <div class="col-lg-5 order-lg-2">
+                <div class="card-botanical shadow-botanical sticky-lg-top animate-fade-in-up" style="top: 2rem;">
+                    <div class="card-header-botanical">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper-botanical me-3">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+                            <h4 class="mb-0 orchid-title">Order Summary</h4>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <div class="d-flex mb-3">
+                                    <div class="flex-shrink-0 me-3">
+                                        @if (!string.IsNullOrEmpty(item.Product?.ProductUrl))
+                                        {
+                                            <img src="@item.Product.ProductUrl" alt="@item.Product.ProductName"
+                                                 class="rounded-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded-3 d-flex align-items-center justify-content-center"
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="bi bi-flower1 text-muted"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">@item.Product.ProductName</h6>
+                                        <small class="text-muted">Qty: @item.Quantity</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="fw-semibold">$@(((item.Product.UnitPrice) * item.Quantity).ToString("F2"))</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <hr class="botanical-divider m-0">
+
+                        <div class="p-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal</span>
+                                <span class="fw-semibold">$@Model.TotalPrice.ToString("F2")</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Shipping</span>
+                                <span class="text-success">Free</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-0">
+                                <span class="h5">Total</span>
+                                <span class="h5 text-primary">$@Model.TotalPrice.ToString("F2")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Details -->
+            <div class="col-lg-7 order-lg-1">
+                <div class="card-botanical shadow-botanical mb-4 animate-fade-in-up delay-100">
+                    <div class="card-header-botanical">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper-botanical me-3">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <h4 class="mb-0 orchid-title">Customer Information</h4>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="customer-info p-3 bg-light rounded-3 mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Name:</strong> @Model.UserAccount?.AccountName</p>
+                                    <p class="mb-1"><strong>Email:</strong> @Model.UserAccount?.Email</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-botanical shadow-botanical animate-fade-in-up delay-200">
+                    <div class="card-header-botanical">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper-botanical me-3">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <h4 class="mb-0 orchid-title">Payment</h4>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label">Payment Method</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cashOnDelivery" checked>
+                                <label class="form-check-label" for="cashOnDelivery">
+                                    <i class="bi bi-cash me-2"></i> Cash on Delivery
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="alert-botanical alert-success-botanical mb-4">
+                            <div class="d-flex">
+                                <div class="icon-wrapper-botanical me-3" style="width: 30px; height: 30px;">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <p class="mb-0">All orders are carefully processed and packaged. Your beautiful orchids will be delivered in perfect condition.</p>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-botanical btn-primary-botanical w-100 animate-pulse">
+                            <i class="bi bi-lock me-2"></i> Place Order
+                        </button>
+
+                        <div class="text-center mt-3">
+                            <a asp-page="/CartPage/Index" class="btn-outline-botanical">
+                                <i class="bi bi-arrow-left me-1"></i> Return to Cart
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <style>
+        /* Additional checkout-specific styles */
+        .customer-info {
+            background-color: var(--light-green);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        /* Botanical form styles */
+        .form-check-input:checked {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+        
+        .form-check-label {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Floating animations for decorative elements */
+        @@keyframes float-slow {
+            0%, 100% { transform: translateY(0) rotate(-30deg); }
+            50% { transform: translateY(-10px) rotate(-25deg); }
+        }
+        
+        @@keyframes float-slow-right {
+            0%, 100% { transform: translateY(0) rotate(30deg) scaleX(-1); }
+            50% { transform: translateY(-10px) rotate(25deg) scaleX(-1); }
+        }
+        
+        .left-leaf {
+            animation: float-slow 6s infinite ease-in-out;
+        }
+        
+        .right-leaf {
+            animation: float-slow-right 6s infinite ease-in-out;
+        }
+        
+        /* Order summary styles */
+        .rounded-3 {
+            border-radius: 12px !important;
+        }
+        
+        /* Text color overrides */
+        .text-primary {
+            color: var(--primary-green) !important;
+        }
+        
+        /* Animation for checkout button */
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+}

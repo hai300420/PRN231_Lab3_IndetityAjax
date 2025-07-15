@@ -1,0 +1,191 @@
+﻿@page "{id:int}"
+@model IdentityAjaxClient.Pages.CheckoutPage.ConfirmationModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Order Confirmation";
+    var usCulture = new CultureInfo("en-US");
+}
+
+<div class="container py-5">
+    <div class="botanical-header text-center mb-5 animate-fade-in-up">
+        <div class="success-animation mb-4">
+            <div class="checkmark-circle animate-scale-in">
+                <div class="checkmark-circle-bg"></div>
+                <div class="checkmark draw"></div>
+            </div>
+        </div>
+
+        <h1 class="display-5 fw-bold mb-2 section-title">Thank You For Your Order!</h1>
+        <p class="section-subtitle mb-4">Your beautiful orchids are on their way to you</p>
+
+        <div class="floating-flowers">
+            <div class="flower flower-1 animate-float">🌸</div>
+            <div class="flower flower-2 animate-float delay-200">🌺</div>
+            <div class="flower flower-3 animate-float delay-300">🌼</div>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <div class="card-botanical shadow-botanical mb-4 animate-fade-in-up delay-200" style="max-width: 600px;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="mb-0 orchid-title">Order #@Model.Order?.OrderId</h5>
+                        <span class="badge-botanical badge-natural">@Model.Order?.OrderStatus</span>
+                    </div>
+
+                    <div class="row text-start mb-4">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <p class="text-muted mb-1">Order Date</p>
+                            <p class="fw-semibold mb-0">@Model.Order?.OrderDate?.ToString("yyyy-MM-dd")</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-muted mb-1">Customer</p>
+                            <p class="fw-semibold mb-0">@Model.Order?.Account?.AccountName</p>
+                        </div>
+                    </div>
+
+                    <div class="border-top border-bottom py-3 mb-4">
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="fw-medium">@item.Quantity x @(item.Product?.ProductName ?? "Unknown Product")</span>
+                                </div>
+                                <span>$@(item.Price?.ToString("F2", usCulture))</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-0">
+                        <span class="h5 mb-0">Total</span>
+                        <span class="h5 text-primary mb-0">$@(Model.Order?.TotalAmount?.ToString("F2", usCulture))</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert-botanical alert-success-botanical mb-4 animate-fade-in-up delay-300 text-center">
+            <i class="bi bi-flower3 text-primary me-2"></i>
+            Your beautiful orchids are being prepared with care
+            <i class="bi bi-flower3 text-primary ms-2"></i>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-page="/Index" class="btn-botanical btn-primary-botanical animate-fade-in-up delay-400">
+                <i class="bi bi-house me-2"></i> Continue Shopping
+            </a>
+            <a asp-page="/OrderPage/Management/Details" class="btn-botanical btn-primary-botanical animate-fade-in-up delay-400" asp-route-id="@Model.Order?.OrderId" class="btn-outline-botanical animate-fade-in-up delay-500">
+                <i class="bi bi-bag me-2"></i> View Order Details
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Success Animation */
+        .success-animation {
+            margin: 0 auto;
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+
+        .checkmark-circle {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            display: block;
+            border-radius: 50%;
+            box-sizing: content-box;
+            padding: 10px;
+        }
+
+        .checkmark-circle-bg {
+            border-radius: 50%;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            width: 100px;
+            height: 100px;
+            background-color: var(--light-green);
+        }
+
+        .checkmark {
+            transform: rotate(45deg);
+            height: 56px;
+            width: 28px;
+            border-right: 5px solid var(--primary-green);
+            border-bottom: 5px solid var(--primary-green);
+            position: absolute;
+            left: 45px;
+            top: 34px;
+            display: block;
+            animation: checkmark 0.5s ease-in-out forwards;
+            opacity: 0;
+        }
+
+        @@keyframes checkmark {
+            0% {
+                opacity: 0;
+                height: 0;
+                width: 0;
+            }
+
+            40% {
+                opacity: 1;
+                height: 0;
+                width: 28px;
+            }
+
+            100% {
+                opacity: 1;
+                height: 56px;
+                width: 28px;
+            }
+        }
+
+        /* Floating Flowers */
+        .floating-flowers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .flower {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+
+        .flower-1 {
+            top: 20%;
+            left: 20%;
+            animation-duration: 6s;
+        }
+
+        .flower-2 {
+            top: 10%;
+            right: 20%;
+            animation-duration: 7s;
+        }
+
+        .flower-3 {
+            bottom: 30%;
+            left: 30%;
+            animation-duration: 8s;
+        }
+
+        /* Order details styling */
+        .border-top, .border-bottom {
+            border-color: var(--light-green) !important;
+        }
+
+        .fw-medium {
+            font-weight: 500;
+        }
+    </style>
+}
