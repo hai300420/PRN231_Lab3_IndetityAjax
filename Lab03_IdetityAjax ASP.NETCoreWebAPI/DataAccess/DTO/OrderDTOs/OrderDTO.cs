@@ -15,6 +15,7 @@ namespace DataAccess.DTO.OrderDTOs
         public string? OrderStatus { get; set; }
         public decimal? TotalAmount { get; set; }
         public string? AccountName { get; set; }
+        public string? Email { get; set; }
         public List<OrderDetailDTO> OrderDetails { get; set; } = new();
     }
 }

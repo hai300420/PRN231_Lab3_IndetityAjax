@@ -1,0 +1,321 @@
+﻿@page
+@model IdentityAjaxClient.Pages.OrderPage.Management.IndexModel
+@{
+    ViewData["Title"] = Model.IsStaff ? "Order Management" : "My Orders";
+}
+
+<div class="container py-5">
+
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <form method="get" class="row gy-3 align-items-end mb-4">
+        @if (Model.IsStaff)
+        {
+            <div class="col-md-3">
+                <label for="CustomerSearch" class="form-label">Customer</label>
+                <input type="text" class="form-control" id="CustomerSearch" name="CustomerSearch" value="@Model.CustomerSearch" />
+            </div>
+        }
+        <div class="col-md-3">
+            <label for="OrderStatusSearch" class="form-label">Order Status</label>
+            <select class="form-select" id="OrderStatusSearch" name="OrderStatusSearch" asp-for="OrderStatusSearch" asp-items="Model.OrderStatusList">
+                <option value="">-- All --</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="StartDateSearch" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="StartDateSearch" name="StartDateSearch" value="@Model.StartDateSearch?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2">
+            <label for="EndDateSearch" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="EndDateSearch" name="EndDateSearch" value="@Model.EndDateSearch?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-search"></i> Search
+            </button>
+            <a class="btn btn-outline-secondary w-100" asp-page="./Index">Clear</a>
+        </div>
+    </form>
+
+    @if (Model.Orders?.Items.Any() == true)
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders.Items)
+                    {
+                        <tr>
+                            <td>@order.OrderDate?.ToString("yyyy-MM-dd")</td>
+                            <td>
+                                @* Adjust based on your actual Account data *@
+                                <div>@order.AccountName</div>
+                                <div class="text-muted small">@order.Email</div>
+                               
+                            </td>
+                            <td>@order.OrderStatus</td>
+                            <td>@order.TotalAmount?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+                            <td class="text-end">
+                                <a asp-page="./Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">Details</a>
+                                @* @if (Model.IsStaff)
+                                { *@
+                                    <a asp-page="./Edit" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                @* } *@
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* Pagination *@
+        <nav class="d-flex justify-content-center mt-4">
+            <ul class="pagination">
+                <li class="page-item @(Model.Orders.PageNumber == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageIndex="1">First</a>
+                </li>
+                <li class="page-item @(Model.Orders.PageNumber == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageIndex="@(Model.Orders.PageNumber - 1)">Previous</a>
+                </li>
+
+                @for (int i = Math.Max(1, Model.Orders.PageNumber - 2); i <= Math.Min(Model.Orders.TotalPages, Model.Orders.PageNumber + 2); i++)
+                {
+                    <li class="page-item @(i == Model.Orders.PageNumber ? "active" : "")">
+                        <a class="page-link" asp-route-pageIndex="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.Orders.PageNumber == Model.Orders.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageIndex="@(Model.Orders.PageNumber + 1)">Next</a>
+                </li>
+                <li class="page-item @(Model.Orders.PageNumber == Model.Orders.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageIndex="@Model.Orders.TotalPages">Last</a>
+                </li>
+            </ul>
+        </nav>
+    }
+    else if (Model.Orders != null)
+    {
+        <div class="alert alert-info text-center mt-5">
+            <i class="bi bi-inbox me-2"></i> No orders found.
+        </div>
+    }
+</div>
+
+
+@functions {
+    string GetStatusBadgeClass(string? status)
+    {
+        return status?.ToLower() switch
+        {
+            "pending" => "badge-botanical badge-warning",
+            "processing" => "badge-botanical badge-info",
+            "shipping" => "badge-botanical badge-primary",
+            "delivered" => "badge-botanical badge-success",
+            "completed" => "badge-botanical badge-success",
+            "cancelled" => "badge-botanical badge-danger",
+            _ => "badge-botanical badge-secondary"
+        };
+    }
+}
+
+@section Styles {
+    <style>
+        /* Form control botanical styling */
+        .form-control-botanical {
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control-botanical:focus {
+                border-color: var(--primary-green);
+                box-shadow: 0 0 0 0.25rem rgba(93, 156, 89, 0.25);
+            }
+
+        /* Table botanical styling */
+        .table-botanical {
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin-bottom: 0;
+        }
+
+            .table-botanical thead th {
+                border: none;
+                font-weight: 600;
+                color: var(--dark-color);
+                padding: 1rem 1.5rem;
+                background-color: var(--light-green);
+                opacity: 0.8;
+            }
+
+            .table-botanical tbody tr {
+                background-color: white;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+                border-radius: 15px;
+                transition: all 0.3s ease;
+            }
+
+                .table-botanical tbody tr:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+                }
+
+            .table-botanical tbody td {
+                padding: 1.25rem 1.5rem;
+                vertical-align: middle;
+                border: none;
+            }
+
+                .table-botanical tbody td:first-child {
+                    border-top-left-radius: 15px;
+                    border-bottom-left-radius: 15px;
+                }
+
+                .table-botanical tbody td:last-child {
+                    border-top-right-radius: 15px;
+                    border-bottom-right-radius: 15px;
+                }
+
+        /* Badge styling */
+        .badge-botanical {
+            padding: 0.5em 1em;
+            font-weight: 500;
+            border-radius: 50px;
+            font-size: 0.75rem;
+        }
+
+        .badge-warning {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #e6a100;
+        }
+
+        .badge-info {
+            background-color: rgba(23, 162, 184, 0.2);
+            color: #138496;
+        }
+
+        .badge-primary {
+            background-color: rgba(var(--primary-rgb), 0.2);
+            color: var(--primary-color);
+        }
+
+        .badge-success {
+            background-color: rgba(var(--primary-green-rgb), 0.2);
+            color: var(--primary-green);
+        }
+
+        .badge-danger {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #c82333;
+        }
+
+        .badge-secondary {
+            background-color: rgba(108, 117, 125, 0.2);
+            color: #5a6268;
+        }
+
+        /* Pagination botanical styling */
+        .pagination-botanical .page-link {
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 3px;
+            border: none;
+            background-color: var(--light-green);
+            color: var(--primary-green);
+            transition: all 0.3s ease;
+        }
+
+        .pagination-botanical .page-item.active .page-link {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        /* Alert styling */
+        .alert-botanical {
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            position: relative;
+        }
+
+        .alert-success-botanical {
+            background-color: rgba(var(--primary-green-rgb), 0.1);
+            color: var(--primary-green);
+        }
+
+        .alert-danger-botanical {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #c82333;
+        }
+
+        /* Background color for botanical light */
+        .bg-botanical-light {
+            background-color: var(--light-green);
+        }
+
+        /* Button size customizations */
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        /* Animations */
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+
+        .fw-medium {
+            font-weight: 500;
+        }
+    </style>
+}
