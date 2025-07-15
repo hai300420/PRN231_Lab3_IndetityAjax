@@ -7,84 +7,71 @@
 <div class="container py-5">
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <div class="alert alert-danger">
+        <div class="alert alert-danger shadow-sm">
             <strong>Error:</strong> @Model.ErrorMessage
         </div>
     }
     else if (!Model.IsProductLoaded)
     {
-        <div class="alert alert-info">
-            Loading product details...
+        <div class="alert alert-info shadow-sm">
+            <i class="bi bi-info-circle me-2"></i> Loading product details...
         </div>
     }
     else
     {
-        <div class="row">
-            <div class="col-md-6">
-                @if (!string.IsNullOrEmpty(Model.Product.ProductUrl))
-                {
-                    <img src="@Model.Product.ProductUrl" alt="@Model.Product.ProductName" class="img-fluid rounded shadow" />
-                }
-                else
-                {
-                    <div class="bg-light d-flex justify-content-center align-items-center" style="height: 300px;">
-                        <span class="text-muted">No image available</span>
-                    </div>
-                }
-            </div>
-            <div class="col-md-6">
-                <h2>@Model.Product.ProductName</h2>
-                <p class="text-muted">@Model.Product.CategoryName</p>
-
-                <h4 class="text-danger">@Model.Product.UnitPrice.ToString("C", new System.Globalization.CultureInfo("en-US"))</h4>
-
-                <p class="mt-3">
-                    @if (string.IsNullOrEmpty(Model.Product.ProductDescription))
+        <div class="card shadow-lg p-4">
+            <div class="row g-5">
+                <div class="col-lg-6 text-center">
+                    @if (!string.IsNullOrEmpty(Model.Product.ProductUrl))
                     {
-                        <em>No description available.</em>
+                        <img src="@Model.Product.ProductUrl" alt="@Model.Product.ProductName"
+                             class="img-fluid rounded-4 shadow product-image" />
                     }
                     else
                     {
-                    <p>Description: @Model.Product.ProductDescription</p>
+                        <div class="bg-light d-flex justify-content-center align-items-center rounded" style="height: 350px;">
+                            <span class="text-muted">No image available</span>
+                        </div>
                     }
-                </p>
+                </div>
+                <div class="col-md-6 d-flex flex-column justify-content-center">
+                    <h2 class="fw-bold">@Model.Product.ProductName</h2>
+                    <p class="text-muted">@Model.Product.CategoryName</p>
 
-                <p><strong>Type:</strong> @(Model.Product.IsNatural == true ? "Natural" : "Hybrid")</p>
-            </div>
-            @if (Model.IsCustomer)
-            {
-                <form id="addToCartForm" method="post" asp-page-handler="AddToCart">
-                    <input type="hidden" name="orchidId" value="@Model.Product.ProductId" />
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label mb-2">Quantity</label>
-                            <div class="quantity-control d-flex">
-                                <button type="button" class="btn quantity-btn" onclick="decreaseQuantity()">
-                                    <i class="bi bi-dash"></i>
-                                </button>
-                                <div class="quantity-input-wrapper">
-                                    <input type="number" id="quantity" name="quantity" class="form-control quantity-input" value="1" min="1" max="10">
+                    <h4 class="text-danger fw-bold">@Model.Product.UnitPrice.ToString("C", new System.Globalization.CultureInfo("en-US"))</h4>
+
+                    <p class="mb-3"><strong>Type:</strong> @(Model.Product.IsNatural == true ? "Natural" : Model.Product.IsNatural == false ? "Hybrid" : "Unknown")</p>
+
+                    @if (Model.IsCustomer)
+                    {
+                        <form id="addToCartForm" method="post" asp-page-handler="AddToCart">
+                            <input type="hidden" name="orchidId" value="@Model.Product.ProductId" />
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Quantity</strong></label>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="decreaseQuantity()">−</button>
+                                    <input type="number" id="quantity" name="quantity" class="form-control text-center" value="1" min="1" max="10" style="max-width: 80px;">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="increaseQuantity()">+</button>
                                 </div>
-                                <button type="button" class="btn quantity-btn" onclick="increaseQuantity()">
-                                    <i class="bi bi-plus"></i>
+                            </div>
+                            <div class="mb-4">
+                                <button type="submit" id="addToCartBtn" class="btn btn-lg w-100 text-white" style="background: linear-gradient(to right, #8e2de2, #4a00e0);">
+                                    <i class="bi bi-cart-plus me-2"></i> Add to Cart
                                 </button>
                             </div>
-                        </div>
-                        <div class="col-md-8 d-grid">
-                            <button type="submit" id="addToCartBtn" class="btn btn-primary btn-lg hero-btn">
-                                <i class="bi bi-cart-plus me-2"></i> Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            }
-            <a asp-page="/Index" class="btn btn-outline-primary mt-3">
-                <i class="bi bi-arrow-left me-2"></i> Browse More Orchids
-            </a>
+                        </form>
+                    }
 
+                    <a asp-page="/Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i> Browse More Orchids
+                    </a>
+                </div>
+
+            </div>
         </div>
     }
 </div>
+
 <form id="antiforgery" method="post">
     @Html.AntiForgeryToken()
 </form>
@@ -168,11 +155,29 @@
     </script>
 }
 
-@section Styles {
-    <style>
-        .text-danger {
-            color: #e74c3c;
-        }
-    </style>
-}
+<style>
+    .product-image {
+        transition: transform 0.3s ease;
+    }
 
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+
+    .quantity-input-wrapper input[type="number"] {
+        max-width: 80px;
+        border-radius: 0;
+    }
+
+    .quantity-input-wrapper .btn {
+        border-radius: 0;
+    }
+
+    .btn-lg {
+        font-size: 1.1rem;
+    }
+
+    .display-6 {
+        font-weight: 600;
+    }
+</style>
