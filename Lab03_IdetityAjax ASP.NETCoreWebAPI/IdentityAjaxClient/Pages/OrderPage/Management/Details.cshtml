@@ -62,13 +62,13 @@
                     <div class="order-info-item mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted">Customer</span>
-                            <span class="fw-medium">@(Model.Order?.Account?.AccountName ?? "N/A")</span>
+                            <span class="fw-medium">@(Model.Order?.AccountName ?? "N/A")</span>
                         </div>
                     </div>
                     <div class="order-info-item mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted">Email</span>
-                            <span class="fw-medium">@(Model.Order?.Account?.Email ?? "N/A")</span>
+                            <span class="fw-medium">@(Model.Order?.Email ?? "N/A")</span>
                         </div>
                     </div>
                     <div class="order-info-item mb-3">
@@ -135,11 +135,11 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    @if (item.ProductId != null && item.Product != null && !string.IsNullOrEmpty(item.Product.ProductUrl))
+                                                    @if (item.ProductId != null && !string.IsNullOrEmpty(item.ProductUrl))
                                                     {
-                                                        <img src="@item.Product.ProductUrl"
+                                                        <img src="@item.ProductUrl"
                                                              class="me-3 rounded-3"
-                                                             alt="@item.Product.ProductName"
+                                                             alt="@item.ProductName"
                                                              style="width: 60px; height: 60px; object-fit: cover;" />
                                                     }
                                                     else
@@ -150,8 +150,8 @@
                                                         </div>
                                                     }
                                                     <div>
-                                                        <h6 class="mb-0 fw-medium">@(item.Product?.ProductName ?? "Unknown Product")</h6>
-                                                        <small class="text-muted">@(item.Product?.Category?.CategoryName ?? "")</small>
+                                                        <h6 class="mb-0 fw-medium">@(item.ProductName ?? "Unknown Product")</h6>
+                                                        <small class="text-muted">@(item.CategoryName ?? "")</small>
                                                     </div>
                                                 </div>
                                             </td>

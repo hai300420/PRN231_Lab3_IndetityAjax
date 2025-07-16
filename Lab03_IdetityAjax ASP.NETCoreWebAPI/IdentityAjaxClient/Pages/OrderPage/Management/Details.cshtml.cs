@@ -16,7 +16,7 @@ namespace IdentityAjaxClient.Pages.OrderPage.Management
             _logger = logger;
         }
 
-        public Order Order { get; set; } = default!;
+        public OrderDTO Order { get; set; } = default!;
         public string ErrorMessage { get; set; } = string.Empty;
 
         public async Task<IActionResult> OnGetAsync(int id)
@@ -31,7 +31,7 @@ namespace IdentityAjaxClient.Pages.OrderPage.Management
                     return Page();
                 }
 
-                var order = await response.Content.ReadFromJsonAsync<Order>();
+                var order = await response.Content.ReadFromJsonAsync<OrderDTO>();
 
                 if (order == null)
                 {

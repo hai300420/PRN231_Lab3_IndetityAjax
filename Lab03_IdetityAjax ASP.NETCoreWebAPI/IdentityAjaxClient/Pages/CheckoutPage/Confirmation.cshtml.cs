@@ -17,7 +17,15 @@ namespace IdentityAjaxClient.Pages.CheckoutPage
         }
 
         public Order? Order { get; set; }
-        public List<OrderDetail> OrderItems { get; set; } = new List<OrderDetail>();
+        // public List<OrderDetail> OrderItems { get; set; } = new List<OrderDetail>();
+        public List<OrderItemViewModel> OrderItems { get; set; } = new();
+
+        public class OrderItemViewModel
+        {
+            public int Quantity { get; set; }
+            public decimal? Price { get; set; }
+            public string ProductName { get; set; } = "Unknown Product";
+        }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -58,9 +66,33 @@ namespace IdentityAjaxClient.Pages.CheckoutPage
                 }
 
                 // Get order details
+                //if (Order.OrderDetails != null)
+                //{
+                //    OrderItems = Order.OrderDetails.ToList();
+                //}
                 if (Order.OrderDetails != null)
                 {
-                    OrderItems = Order.OrderDetails.ToList();
+                    foreach (var detail in Order.OrderDetails)
+                    {
+                        var productName = "Unknown Product";
+
+                        if (detail.ProductId != 0)
+                        {
+                            var productResponse = await _httpClient.GetAsync($"products/{detail.ProductId}");
+                            if (productResponse.IsSuccessStatusCode)
+                            {
+                                var product = await productResponse.Content.ReadFromJsonAsync<Product>();
+                                productName = product?.ProductName ?? "Unknown Product";
+                            }
+                        }
+
+                        OrderItems.Add(new OrderItemViewModel
+                        {
+                            Quantity = (int)detail.Quantity,
+                            Price = detail.Price,
+                            ProductName = productName
+                        });
+                    }
                 }
 
                 return Page();

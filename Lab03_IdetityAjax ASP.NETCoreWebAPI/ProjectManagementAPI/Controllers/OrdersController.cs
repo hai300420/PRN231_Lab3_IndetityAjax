@@ -42,7 +42,7 @@ namespace ProjectManagementAPI.Controllers
         //}
 
         [HttpGet]
-        public ActionResult<PagedResult<OrderDTO>> GetOrders(
+        public ActionResult<PagedResult<Order>> GetOrders(
                     int? id = null,
                     OrderStatusEnum? orderStatus = null,
                     string? customer = null,
@@ -106,7 +106,9 @@ namespace ProjectManagementAPI.Controllers
                         ProductId = od.ProductId,
                         Price = od.Price,
                         Quantity = od.Quantity,
-                        ProductName = od.Product?.ProductName
+                        ProductName = od.Product?.ProductName,
+                        ProductUrl = od.Product?.ProductUrl,
+                        CategoryName = od.Product?.Category?.CategoryName
                     }).ToList()
                 })
                 .ToList();
@@ -135,18 +137,50 @@ namespace ProjectManagementAPI.Controllers
                 OrderStatus = orders.OrderStatus,
                 TotalAmount = orders.TotalAmount,
                 AccountName = orders.Account?.AccountName,
+                Email = orders.Account?.Email,
                 OrderDetails = orders.OrderDetails.Select(od => new OrderDetailDTO
                 {
                     OrderDetailId = od.OrderDetailId,
                     ProductId = od.ProductId,
                     Price = od.Price,
                     Quantity = od.Quantity,
-                    ProductName = od.Product?.ProductName
+                    ProductName = od.Product?.ProductName,
+                    ProductUrl = od.Product?.ProductUrl,
+                    CategoryName = od.Product?.Category?.CategoryName
                 }).ToList()
             };
 
             return Ok(dto);
         }
+
+        //[HttpGet("{id}")]
+        //public ActionResult<OrderDTO> GetOrder(int id)
+        //{
+        //    var orders = repository.GetOrderById(id);
+        //    if (orders == null) return NotFound();
+
+        //    var dto = new OrderDTO
+        //    {
+        //        OrderId = orders.OrderId,
+        //        AccountId = orders.AccountId,
+        //        OrderDate = orders.OrderDate,
+        //        OrderStatus = orders.OrderStatus,
+        //        TotalAmount = orders.TotalAmount,
+        //        AccountName = orders.Account?.AccountName,
+        //        Email = orders.Account?.Email,
+        //        OrderDetails = orders.OrderDetails.Select(od => new OrderDetailDTO
+        //        {
+        //            OrderDetailId = od.OrderDetailId,
+        //            ProductId = od.ProductId,
+        //            Price = od.Price,
+        //            Quantity = od.Quantity,
+        //            ProductName = od.Product?.ProductName
+        //        }).ToList()
+        //    };
+
+        //    return Ok(dto);
+        //}
+
 
         [HttpPost]
         public IActionResult PostOrder([FromBody] OrderCreateDTO dto)

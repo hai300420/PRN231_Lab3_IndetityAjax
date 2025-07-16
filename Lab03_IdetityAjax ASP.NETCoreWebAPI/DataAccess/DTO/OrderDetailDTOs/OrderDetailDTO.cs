@@ -14,5 +14,7 @@ namespace DataAccess.DTO.OrderDetailDTOs
         public int? Quantity { get; set; }
         public int? OrderId { get; set; }
         public string? ProductName { get; set; } // For display
+        public string? ProductUrl { get; set; }
+        public string? CategoryName { get; set; }
     }
 }

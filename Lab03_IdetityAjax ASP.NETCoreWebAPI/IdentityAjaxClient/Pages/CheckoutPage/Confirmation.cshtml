@@ -48,7 +48,7 @@
                         {
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div>
-                                    <span class="fw-medium">@item.Quantity x @(item.Product?.ProductName ?? "Unknown Product")</span>
+                                    <span class="fw-medium">@item.Quantity x @(item.ProductName ?? "Unknown Product")</span>
                                 </div>
                                 <span>$@(item.Price?.ToString("F2", usCulture))</span>
                             </div>
