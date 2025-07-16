@@ -44,7 +44,7 @@ namespace ProjectManagementAPI.Controllers
         [HttpGet]
         public ActionResult<PagedResult<ProductDTO>> GetProducts(
              int? id = null,
-             string? name = null,
+             string? nameSearch = null,
              int? categoryId = null,
              bool? isNatural = null,
              int page = 1,
@@ -57,9 +57,9 @@ namespace ProjectManagementAPI.Controllers
                 products = products.Where(p => p.ProductId == id.Value).ToList();
             }
             // Apply filters
-            if (!string.IsNullOrWhiteSpace(name))
+            if (!string.IsNullOrWhiteSpace(nameSearch))
             {
-                products = products.Where(p => p.ProductName.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+                products = products.Where(p => p.ProductName.Contains(nameSearch, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             if (categoryId.HasValue)

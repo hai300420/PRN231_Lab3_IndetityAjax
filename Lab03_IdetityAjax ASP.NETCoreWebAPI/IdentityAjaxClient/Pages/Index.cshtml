@@ -134,16 +134,20 @@ else
 
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                     <input type="text" class="form-control search-input" id="nameSearch" name="nameSearch"  placeholder="Search by name">
+                                     <input type="text" class="form-control search-input" id="nameSearch" name="name"  placeholder="Search by name">
                                      <label for="nameSearch">Orchid Name</label>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <select class="form-select search-input" id="categoryIdSearch" name="categoryIdSearch">
+                                    @* <select class="form-select search-input" id="categoryIdSearch" name="categoryIdSearch">
                                         <option value="">All Categories</option>
                                     </select> 
-                                    <label for="categoryIdSearch">Category</label>
+                                    <label for="categoryIdSearch">Category</label> *@
+                                    <select asp-for="CategoryId" class="form-select" asp-items="Model.CategoryList" class="form-select" >
+                                        <option value="">All Categories</option>
+                                    </select>
+
                                 </div>
                             </div>
                             <div class="col-md-2">
@@ -175,7 +179,7 @@ else
         </div>
 
         <!-- Product List Section -->
-        <div class="row" id="products">
+        <div class="row">
             <div class="col-12">
 
                 @if (!Model.Products?.Any() ?? true)
@@ -263,25 +267,6 @@ else
                     </div>
 
                     <!-- Pagination -->
-                    @* <div class="d-flex justify-content-center mt-4">
-                        <nav>
-                            <ul class="pagination">
-                                <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
-                                    <a class="page-link" asp-route-Page="@(Model.Page - 1)">← Previous</a>
-                                </li>
-
-                                <li class="page-item disabled">
-                                    <span class="page-link">
-                                        Page @Model.Page of @Model.TotalPages
-                                    </span>
-                                </li>
-
-                                <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
-                                    <a class="page-link" asp-route-Page="@(Model.Page + 1)">Next →</a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div> *@
                     @if (Model.TotalPages > 1)
                     {
                         <div class="d-flex justify-content-center mt-4">

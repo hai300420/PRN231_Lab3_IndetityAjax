@@ -1,9 +1,11 @@
 using DataAccess.DTO;
 using DataAccess.DTO.CartDTOs;
+using DataAccess.DTO.CategoryDTOs;
 using DataAccess.DTO.ProductDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -35,6 +37,10 @@ namespace IdentityAjaxClient.Pages
         public List<Claim> UserClaims { get; set; } = new();
 
 
+        public SelectList? CategoryList { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public int? CategoryId { get; set; }
+
         public async Task OnGetAsync()
         {
             // Info in token
@@ -48,6 +54,15 @@ namespace IdentityAjaxClient.Pages
             // end token
             if (Page <= 0)
                 Page = 1;
+
+            // load category list
+            var categories = await _httpClient.GetAsync("Categories");
+            if (categories.IsSuccessStatusCode)
+            {
+                var categoriesList = await categories.Content.ReadFromJsonAsync<List<CategoryDTO>>();
+                CategoryList = new SelectList(categoriesList, "CategoryId", "CategoryName");
+            }
+
             try
             {
                 // Check if current user is customer
@@ -55,7 +70,34 @@ namespace IdentityAjaxClient.Pages
                 IsCustomer = !string.IsNullOrEmpty(userRole) && userRole.Equals("Customer", StringComparison.OrdinalIgnoreCase);
 
                 // Call API to get paginated products
-                var httpResponse = await _httpClient.GetAsync($"Products?page={Page}&pageSize=6");
+                // var httpResponse = await _httpClient.GetAsync($"Products?page={Page}&pageSize=6");
+                // Get query params from form (via model binding)
+                var name = Request.Query["name"].ToString();
+                var categoryId = Request.Query["categoryId"].ToString();
+                var isNatural = Request.Query["isNatural"].ToString();
+
+                // Build query string dynamically
+                var queryParams = new List<string>
+                {
+                    $"page={Page}",
+                    "pageSize=6"
+                };
+
+                if (!string.IsNullOrEmpty(name))
+                    queryParams.Add($"nameSearch={Uri.EscapeDataString(name)}");
+
+                if (!string.IsNullOrEmpty(categoryId))
+                    queryParams.Add($"categoryId={Uri.EscapeDataString(categoryId)}");
+
+                if (!string.IsNullOrEmpty(isNatural))
+                    queryParams.Add($"isNatural={Uri.EscapeDataString(isNatural)}");
+
+                var queryString = string.Join("&", queryParams);
+
+                // Make API request with all filters
+                var httpResponse = await _httpClient.GetAsync($"Products?{queryString}");
+
+                
 
                 if (httpResponse.IsSuccessStatusCode)
                 {
@@ -88,6 +130,8 @@ namespace IdentityAjaxClient.Pages
                 Products = new List<ProductDTO>();
             }
         }
+
+
 
         public async Task<IActionResult> OnPostAddToCartAsync(int orchidId, int quantity = 1)
         {
