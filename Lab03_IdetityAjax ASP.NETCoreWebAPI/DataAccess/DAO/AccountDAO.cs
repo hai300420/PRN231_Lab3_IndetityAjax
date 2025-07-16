@@ -133,7 +133,7 @@ namespace DataAccess.DAO
             try
             {
                 using var context = new MyStoreDbContext();
-                return context.Accounts.FirstOrDefault(a => a.Email == email && a.Password == password);
+                return context.Accounts.Include(a => a.Role).FirstOrDefault(a => a.Email == email && a.Password == password);
             }
             catch (Exception ex)
             {

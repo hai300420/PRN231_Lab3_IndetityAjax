@@ -71,10 +71,10 @@
                             <td>@order.TotalAmount?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
                             <td class="text-end">
                                 <a asp-page="./Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">Details</a>
-                                @* @if (Model.IsStaff)
-                                { *@
+                                @if (Model.IsStaff)
+                                {
                                     <a asp-page="./Edit" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                @* } *@
+                                }
                             </td>
                         </tr>
                     }

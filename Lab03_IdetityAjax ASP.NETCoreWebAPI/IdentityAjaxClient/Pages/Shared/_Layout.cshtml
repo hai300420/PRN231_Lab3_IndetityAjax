@@ -26,6 +26,26 @@
             var isStaff = userRole == "staff";
             var isAdmin = userRole == "admin";
         }
+        @{
+            var token = Context.Session.GetString("JWTToken");
+            var claims = string.IsNullOrEmpty(token) ? null : JwtHelper.DecodeJwt(token);
+        }
+        <!--  Show token value -->
+        @* @if (claims != null)
+        {
+            <div class="container my-3">
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-shield-lock-fill me-1"></i> Token Claims</h6>
+                    <ul class="mb-0">
+                        @foreach (var claim in claims)
+                        {
+                            <li><strong>@claim.Type:</strong> @claim.Value</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        } *@
+        <!--  End Show token value -->
 
         <nav class="navbar navbar-expand-lg navbar-flower py-3">
             <div class="container">
@@ -46,21 +66,21 @@
                             </a>
                         </li>
 
-                        @* @if (isAuthenticated)
-                        { *@
+                        @if (isAuthenticated)
+                        {
                             <!-- Pages for Customer -->
-                            @* @if (isCustomer)
-                            { *@
+                            @if (isCustomer)
+                            {
                                 <li class="nav-item">
                                     <a class="nav-link" asp-area="" asp-page="/OrderPage/Management/Index">
                                         <i class="bi bi-bag-check me-1"></i> Orders
                                     </a>
                                 </li>
-                            @* } *@
+                            }
 
                             <!-- Pages for Staff only -->
-                            @* @if (isStaff)
-                            { *@
+                            @if (isStaff)
+                            {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="managementDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="bi bi-gear me-1"></i> Management
@@ -83,18 +103,18 @@
                                         </li>
                                     </ul>
                                 </li>
-                            @* } *@
+                            }
 
                             <!-- Pages for Admin only -->
-                            @* @if (isAdmin)
-                            { *@
+                            @if (isAdmin)
+                            {
                                 <li class="nav-item">
                                     <a class="nav-link" asp-area="" asp-page="/UserPage/Management/Index">
                                         <i class="bi bi-people me-1"></i> User Management
                                     </a>
                                 </li>
-                            @* } *@
-                        @* } *@
+                            }
+                        }
                     </ul>
 
                     <ul class="navbar-nav ms-auto">

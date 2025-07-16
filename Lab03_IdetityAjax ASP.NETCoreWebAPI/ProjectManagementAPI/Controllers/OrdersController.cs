@@ -49,7 +49,8 @@ namespace ProjectManagementAPI.Controllers
                     DateTime? startDate = null,
                     DateTime? endDate = null,
                     int page = 1,
-                    int pageSize = 10)
+                    int pageSize = 10,
+                    int? accountId = null)
         {
             var orders = repository.GetOrders();
 
@@ -65,6 +66,11 @@ namespace ProjectManagementAPI.Controllers
                 orders = orders.Where(o => o.OrderStatus == statusString).ToList();
             }
 
+            // See own order
+            if (accountId.HasValue)
+            {
+                orders = orders.Where(o => o.AccountId == accountId.Value).ToList();
+            }
 
             if (!string.IsNullOrWhiteSpace(customer))
             {

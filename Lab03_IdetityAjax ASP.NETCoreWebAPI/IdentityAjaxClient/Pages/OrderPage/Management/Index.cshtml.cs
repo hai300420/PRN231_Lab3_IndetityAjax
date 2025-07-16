@@ -43,6 +43,23 @@ namespace IdentityAjaxClient.Pages.OrderPage.Management
 
         public async Task<IActionResult> OnGetAsync()
         {
+            // Get role
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userId = HttpContext.Session.GetString("UserId");
+
+            IsStaff = !string.IsNullOrEmpty(userRole) &&
+                    (userRole.Equals("Staff", StringComparison.OrdinalIgnoreCase));
+
+            bool isCustomer = !string.IsNullOrEmpty(userRole) &&
+                (userRole.Equals("Customer", StringComparison.OrdinalIgnoreCase));
+
+            // Check authorization
+            if (!IsStaff && !isCustomer)
+            {
+                TempData["ErrorMessage"] = "You are not authorized to access order management.";
+                return RedirectToPage("/Index");
+            }
+
             // 1. Build the query string for filtering
             var queryParams = new Dictionary<string, string?>
             {
@@ -53,6 +70,10 @@ namespace IdentityAjaxClient.Pages.OrderPage.Management
                 ["startDate"] = StartDateSearch?.ToString("yyyy-MM-dd"),
                 ["endDate"] = EndDateSearch?.ToString("yyyy-MM-dd")
             };
+            if (isCustomer && !string.IsNullOrEmpty(userId))
+            {
+                queryParams["accountId"] = userId; // Customers view his order
+            }
 
             string queryString = string.Join("&", queryParams
                 .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
@@ -82,8 +103,6 @@ namespace IdentityAjaxClient.Pages.OrderPage.Management
                         Text = s.ToString()
                     }), "Value", "Text");
 
-            // 3. Simulate role check
-            IsStaff = User.IsInRole("Staff"); // Or use any role detection logic you have
 
             return Page();
         }
